@@ -1,0 +1,224 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 201 100% 56%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 201 100% 56%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 201 100% 56%;
+    --primary-foreground: 0 85.7% 97.3%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 201 100% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-[hsl(var(--border))];
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom animations */
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-floating {
+  animation: floating 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Gradient text for headings */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#2496f8] to-[#3182dc];
+}
+
+/* Smooth transitions */
+.page-transition {
+  @apply transition-all duration-300;
+}
+
+/* Hero gradient background */
+.hero-gradient {
+  @apply bg-gradient-to-tr from-[#1a2657] via-[#2496f8] to-[#2acfcf];
+}
+
+/* Custom button styling */
+.btn-primary {
+  @apply bg-[#2496f8] hover:bg-[#3182dc] text-white font-semibold px-6 py-3 rounded-md shadow transition-colors;
+}
+
+.btn-secondary {
+  @apply bg-white text-[#2496f8] border border-[#2496f8] font-semibold px-6 py-3 rounded-md shadow hover:bg-[#f0f7ff] transition-colors;
+}
+
+/* Card hover animations */
+.feature-card {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col items-center text-center border border-[#eaeaea] dark:border-gray-700 transition-all duration-300;
+}
+
+.feature-card:hover {
+  @apply shadow-2xl dark:shadow-gray-900/30 transform -translate-y-1;
+}
+
+/* Pricing cards */
+.pricing-card {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col border border-[#eaeaea] dark:border-gray-700 transition-all duration-300;
+}
+
+.pricing-card:hover {
+  @apply shadow-2xl dark:shadow-gray-900/30 transform -translate-y-2;
+}
+
+.pricing-card.featured {
+  @apply border-[#2496f8] border-2;
+}
+
+/* Progress bar animation for download */
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-progress {
+  animation: progress 2s ease-in-out forwards;
+}
+
+/* Optimized animations and transitions */
+@layer utilities {
+  /* Smooth page transitions */
+  .page-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+  }
+  .page-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .page-exit-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 150ms ease-in, transform 150ms ease-in;
+  }
+
+  /* Optimized loading animations */
+  .skeleton-loading {
+    @apply relative overflow-hidden;
+  }
+  .skeleton-loading::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Smooth hover transitions */
+  .hover-transition {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  /* Optimized motion */
+  .motion-safe {
+    @apply motion-reduce:transform-none motion-reduce:transition-none;
+  }
+}
+
+/* Optimize skeleton animations */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Add loading bar animation */
+.loading-bar {
+  @apply fixed top-0 left-0 h-1 bg-primary z-50;
+  animation: loading-bar 1s ease-in-out infinite;
+  transform-origin: 0 50%;
+}
+
+@keyframes loading-bar {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.5);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
