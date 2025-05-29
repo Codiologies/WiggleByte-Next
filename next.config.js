@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',  // Enable static exports
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
     domains: [
       "source.unsplash.com",
       "images.unsplash.com",
@@ -32,8 +31,6 @@ const nextConfig = {
       },
     ],
   },
-  // Ensure trailing slashes for Firebase hosting
-  trailingSlash: true,
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
