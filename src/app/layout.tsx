@@ -8,10 +8,15 @@ import { cn } from '@/lib/utils';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  display: 'swap',
+});
+
 const ubuntuMono = Ubuntu_Mono({
   weight: ['400', '700'],
   subsets: ['latin'],
+  display: 'swap',
   variable: '--font-ubuntu-mono',
 });
 
@@ -26,8 +31,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn('min-h-screen bg-background font-sans antialiased', inter.className, ubuntuMono.variable)}>
+    <html lang="en" suppressHydrationWarning className={ubuntuMono.variable}>
+      <body className={cn(
+        'min-h-screen bg-background antialiased',
+        inter.className
+      )}>
         <LoadingBar />
         <ThemeProvider
           attribute="class"
