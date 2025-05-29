@@ -100,6 +100,7 @@ export default function PaymentPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           amount: amountInINR,
@@ -116,12 +117,18 @@ export default function PaymentPage() {
       const responseText = await response.text();
       console.log('Raw response text:', responseText);
 
+      // Check if response is HTML (error page)
+      if (responseText.trim().startsWith('<!DOCTYPE html>')) {
+        console.error('Received HTML instead of JSON:', responseText.substring(0, 200));
+        throw new Error('Payment service is currently unavailable. Please try again later.');
+      }
+
       let data;
       try {
         data = JSON.parse(responseText);
       } catch (e) {
         console.error('Failed to parse response as JSON:', e);
-        throw new Error(`Invalid response from server: ${responseText.substring(0, 100)}...`);
+        throw new Error('Payment service returned an invalid response. Please try again later.');
       }
 
       if (!response.ok) {
