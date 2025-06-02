@@ -64,28 +64,25 @@ function NavbarContent() {
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3 group">
+            <Link href="/" className="flex items-center space-x-2 md:space-x-3 group touch-target">
               <img 
                 src="/images/logo/logo.png" 
-                width={150} 
-                height={150} 
+                width={120} 
+                height={120} 
                 alt="Wiggle Byte Logo" 
-                className="group-hover:scale-110 transition-transform duration-200"
+                className="w-24 md:w-32 h-auto group-hover:scale-110 transition-transform duration-200"
                 style={{ borderRadius: '0' }}
               />
-              <span className="font-bold text-2xl text-[#2496f8] group-hover:text-[#1d8ae3] transition-colors duration-200">
-                
-              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-8">
+            <div className="ml-10 flex items-center space-x-4 lg:space-x-8">
               {navigation.map((item) => (
                 <div key={item.name} className="relative">
                   {item.name === "Console" && !user?.emailVerified ? (
@@ -96,7 +93,7 @@ function NavbarContent() {
                         });
                         router.push('/verify-email');
                       }}
-                      className="px-3 py-2 rounded-md text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50"
+                      className="px-3 py-2 rounded-md text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50 touch-target"
                       disabled
                     >
                       {item.name}
@@ -104,7 +101,7 @@ function NavbarContent() {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 touch-target ${
                         isActive(item.href)
                           ? "text-[#2496f8] bg-blue-50 dark:bg-blue-950"
                           : "text-gray-700 dark:text-gray-300 hover:text-[#2496f8]"
@@ -119,17 +116,17 @@ function NavbarContent() {
           </div>
 
           {/* Desktop Auth Buttons / Profile */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
             {showProfile && (
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-[#2496f8] dark:hover:text-[#2496f8]"
+                  className="flex items-center space-x-2 text-gray-700 dark:text-gray-200 hover:text-[#2496f8] dark:hover:text-[#2496f8] touch-target"
                 >
                   <div className="w-8 h-8 rounded-full bg-[#2496f8] flex items-center justify-center text-white">
                     {userInitial}
                   </div>
-                  <span className="hidden md:inline-block">{userName}</span>
+                  <span className="hidden lg:inline-block">{userName}</span>
                 </button>
 
                 {/* Profile Dropdown Menu */}
@@ -186,13 +183,13 @@ function NavbarContent() {
                 <Button
                   variant="outline"
                   asChild
-                  className="border-2 border-[#2496f8] text-[#2496f8] hover:bg-[#2496f8] hover:text-white dark:border-[#2496f8] dark:text-[#2496f8] transition-all duration-200 font-medium"
+                  className="border-2 border-[#2496f8] text-[#2496f8] hover:bg-[#2496f8] hover:text-white dark:border-[#2496f8] dark:text-[#2496f8] transition-all duration-200 font-medium touch-target"
                 >
                   <Link href="/login">Login</Link>
                 </Button>
                 <Button
                   asChild
-                  className="bg-[#2496f8] hover:bg-[#1d8ae3] text-white px-6 py-2 rounded-md font-medium transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 hover:scale-105"
+                  className="bg-[#2496f8] hover:bg-[#1d8ae3] text-white px-4 lg:px-6 py-2 rounded-md font-medium transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5 hover:scale-105 touch-target"
                 >
                   <Link href="/signup">SignUp</Link>
                 </Button>
@@ -206,7 +203,7 @@ function NavbarContent() {
               variant="ghost"
               size="sm"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 dark:text-gray-300 hover:text-[#2496f8] hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="text-gray-700 dark:text-gray-300 hover:text-[#2496f8] hover:bg-gray-100 dark:hover:bg-gray-800 touch-target"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
@@ -233,7 +230,7 @@ function NavbarContent() {
                       router.push('/verify-email');
                       setIsMenuOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50"
+                    className="block w-full text-left px-3 py-3 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50 touch-target"
                     disabled
                   >
                     {item.name}
@@ -241,7 +238,7 @@ function NavbarContent() {
                 ) : (
                   <Link
                     href={item.href}
-                    className={`block px-3 py-2 rounded-md text-base font-medium transition-all duration-200 ${
+                    className={`block px-3 py-3 rounded-md text-base font-medium transition-all duration-200 touch-target ${
                       isActive(item.href)
                         ? "text-[#2496f8] bg-blue-50 dark:bg-blue-950"
                         : "text-gray-700 dark:text-gray-300 hover:text-[#2496f8] hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -255,14 +252,14 @@ function NavbarContent() {
             ))}
             
             {/* Mobile Auth Buttons / Profile */}
-            <div className="pt-4 space-y-2 border-t border-gray-200 dark:border-gray-800 mt-4">
+            <div className="pt-4 space-y-3 border-t border-gray-200 dark:border-gray-800 mt-4">
               {showProfile && (
                 <>
-                  <div className="flex items-center px-3 py-2">
-                    <div className="w-8 h-8 rounded-full bg-[#2496f8] flex items-center justify-center text-white mr-2">
+                  <div className="flex items-center px-3 py-3">
+                    <div className="w-10 h-10 rounded-full bg-[#2496f8] flex items-center justify-center text-white mr-3">
                       {userInitial}
                     </div>
-                    <span className="text-gray-700 dark:text-gray-300">{userName}</span>
+                    <span className="text-gray-700 dark:text-gray-300 text-lg">{userName}</span>
                   </div>
                   {user?.emailVerified ? (
                     <>
@@ -313,13 +310,13 @@ function NavbarContent() {
                   <Button
                     variant="outline"
                     asChild
-                    className="w-full border-2 border-[#2496f8] text-[#2496f8] hover:bg-[#2496f8] hover:text-white"
+                    className="w-full border-2 border-[#2496f8] text-[#2496f8] hover:bg-[#2496f8] hover:text-white touch-target py-3"
                   >
                     <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
                   </Button>
                   <Button
                     asChild
-                    className="w-full bg-[#2496f8] hover:bg-[#1d8ae3] text-white font-medium"
+                    className="w-full bg-[#2496f8] hover:bg-[#1d8ae3] text-white font-medium touch-target py-3"
                   >
                     <Link href="/signup" onClick={() => setIsMenuOpen(false)}>SignUp</Link>
                   </Button>

@@ -7,16 +7,69 @@ import { Navbar } from "@/components/ui/navbar";
 import { Footer } from "@/components/ui/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Receipt, Calendar, CreditCard, AlertCircle } from "lucide-react";
-import { format } from "date-fns";
+import { Download, Receipt, Calendar, CreditCard, AlertCircle, Filter, X, ChevronDown } from "lucide-react";
+import { format, isWithinInterval, startOfDay, endOfDay, subDays, parseISO } from "date-fns";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function BillingLogs() {
   const [payments, setPayments] = useState<PaymentHistory[]>([]);
+  const [filteredPayments, setFilteredPayments] = useState<PaymentHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
   const { user } = useAuth();
+
+  const quickFilters = [
+    {
+      label: "Last 7 days",
+      getDateRange: () => ({
+        from: subDays(new Date(), 7),
+        to: new Date(),
+      }),
+    },
+    {
+      label: "Last 30 days",
+      getDateRange: () => ({
+        from: subDays(new Date(), 30),
+        to: new Date(),
+      }),
+    },
+    {
+      label: "Last 90 days",
+      getDateRange: () => ({
+        from: subDays(new Date(), 90),
+        to: new Date(),
+      }),
+    },
+    {
+      label: "This month",
+      getDateRange: () => ({
+        from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        to: new Date(),
+      }),
+    },
+    {
+      label: "Last month",
+      getDateRange: () => ({
+        from: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
+        to: new Date(new Date().getFullYear(), new Date().getMonth(), 0),
+      }),
+    },
+  ];
+
+  const applyQuickFilter = (filter: typeof quickFilters[0]) => {
+    const range = filter.getDateRange();
+    setStartDate(format(range.from, 'yyyy-MM-dd'));
+    setEndDate(format(range.to, 'yyyy-MM-dd'));
+  };
 
   // Function to wait for html2pdf to be available
   const waitForHtml2Pdf = () => {
@@ -488,7 +541,7 @@ export default function BillingLogs() {
               <div class="invoice-meta">
                 <h2>INVOICE</h2>
                 <p><strong>INVOICE #:</strong> ${data.invoiceNumber}</p>
-                <p><strong>DATE:</strong> ${format(data.paymentDate.toDate(), 'dd/MM/yyyy')}</p>
+                <p><strong>DATE:</strong> ${format(data.paymentDate.toDate(), 'dd/MM/yyyy HH:mm:ss')}</p>
                 <div class="status-paid">PAID</div>
               </div>
             </div>
@@ -506,7 +559,7 @@ export default function BillingLogs() {
                 <p><strong>PAYMENT METHOD:</strong> <span>${data.paymentMethod}</span></p>
                 <p><strong>TRANSACTION ID:</strong> <span>${data.transactionId}</span></p>
                 <p><strong>BILLING STATUS:</strong> <span>${data.billingCycle}</span></p>
-                <p><strong>PURCHASES DATE:</strong> <span>${format(data.paymentDate.toDate(), 'dd/MM/yyyy')}</span></p>
+                <p><strong>PURCHASES DATE:</strong> <span>${format(data.paymentDate.toDate(), 'dd/MM/yyyy HH:mm:ss')}</span></p>
               </div>
             </div>
     
@@ -577,6 +630,7 @@ export default function BillingLogs() {
       try {
         const history = await getUserPaymentHistory(user.uid);
         setPayments(history);
+        setFilteredPayments(history);
       } catch (error) {
         console.error('Error fetching payment history:', error);
         toast.error('Failed to load payment history');
@@ -587,6 +641,37 @@ export default function BillingLogs() {
 
     fetchPayments();
   }, [user]);
+
+  // Filter payments based on date range
+  useEffect(() => {
+    if (!startDate && !endDate) {
+      setFilteredPayments(payments);
+      return;
+    }
+
+    let start = startDate ? startOfDay(parseISO(startDate)) : null;
+    let end = endDate ? endOfDay(parseISO(endDate)) : null;
+
+    const filtered = payments.filter(payment => {
+      const paymentDate = payment.paymentDate.toDate();
+      if (start && end) {
+        return isWithinInterval(paymentDate, { start, end });
+      } else if (start) {
+        return paymentDate >= start;
+      } else if (end) {
+        return paymentDate <= end;
+      } else {
+        return true; // Should not happen with the initial check
+      }
+    });
+
+    setFilteredPayments(filtered);
+  }, [startDate, endDate, payments]);
+
+  const clearDateFilter = () => {
+    setStartDate('');
+    setEndDate('');
+  };
 
   // Loading animation component
   const LoadingPulse = () => (
@@ -690,17 +775,96 @@ export default function BillingLogs() {
             </Card>
           ) : (
             <>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-                Billing Logs
-              </h1>
-              <div className="grid gap-6">
-                {payments.map((payment) => (
-                  <Card key={payment.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <CreditCard className="h-5 w-5 text-blue-600" />
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    Billing Logs
+                  </h1>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span>Showing {filteredPayments.length} of {payments.length} records</span>
+                  </div>
+                </div>
+
+                <Card className="border-2">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center gap-2">
+                        <Filter className="h-5 w-5 text-gray-500" />
+                        <span className="font-medium">Filter by Date</span>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 items-center">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                          <input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="p-2 border rounded-md w-full"
+                          />
+                          <input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="p-2 border rounded-md w-full"
+                          />
+                        </div>
+                        
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" className="w-full sm:w-auto gap-2">
+                                Quick Filters
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-[200px]">
+                              {quickFilters.map((filter) => (
+                                <DropdownMenuItem
+                                  key={filter.label}
+                                  onClick={() => applyQuickFilter(filter)}
+                                >
+                                  {filter.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+
+                          {(startDate || endDate) && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={clearDateFilter}
+                              className="h-10 w-10 flex-shrink-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {(startDate || endDate) && (
+                        <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                          <div className="flex flex-wrap items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                            <span className="font-medium">Selected Range:</span>
+                            <span className="break-words">
+                              {startDate ? format(parseISO(startDate), "MMM dd, yyyy") : 'Start Date'} -{" "}
+                              {endDate ? format(parseISO(endDate), "MMM dd, yyyy") : 'End Date'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-6">
+                  {filteredPayments.map((payment) => (
+                    <Card key={payment.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <CreditCard className="h-5 w-5 text-blue-600 flex-shrink-0" />
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                               {payment.planType.toUpperCase()} PLAN
                             </h3>
@@ -717,51 +881,54 @@ export default function BillingLogs() {
                           
                           <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
                             <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              {format(payment.paymentDate.toDate(), 'PPP')}
+                              <Calendar className="h-4 w-4 flex-shrink-0" />
+                              <span className="break-words">{format(payment.paymentDate.toDate(), 'PPP p')}</span>
                             </div>
-                            <div>
-                              Amount: {payment.currency} {payment.amount.toFixed(2)}
+                            <div className="flex items-center gap-2">
+                              <span>Amount: {payment.currency} {payment.amount.toFixed(2)}</span>
                             </div>
-                            <div>
-                              Billing: {payment.billingCycle}
+                            <div className="flex items-center gap-2">
+                              <span>Billing: {payment.billingCycle}</span>
                             </div>
-                            <div>
-                              Invoice: {payment.invoiceNumber}
+                            <div className="flex items-center gap-2">
+                              <Receipt className="h-4 w-4 flex-shrink-0" />
+                              <span className="font-mono break-all">Invoice: {payment.invoiceNumber}</span>
                             </div>
                           </div>
+                          
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={() => handleDownloadInvoice(payment.id!)}
+                              disabled={downloading === payment.id || !scriptLoaded}
+                              className={`w-full sm:w-auto whitespace-nowrap transition-all duration-300 ${
+                                downloading === payment.id || !scriptLoaded
+                                  ? 'opacity-75 cursor-not-allowed'
+                                  : 'hover:scale-105'
+                              }`}
+                            >
+                              {downloading === payment.id ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Downloading...
+                                </>
+                              ) : !scriptLoaded ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                  Loading PDF Tools...
+                                </>
+                              ) : (
+                                <>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download Invoice
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         </div>
-                        
-                        <Button
-                          onClick={() => handleDownloadInvoice(payment.id!)}
-                          disabled={downloading === payment.id || !scriptLoaded}
-                          className={`whitespace-nowrap transition-all duration-300 ${
-                            downloading === payment.id || !scriptLoaded
-                              ? 'opacity-75 cursor-not-allowed'
-                              : 'hover:scale-105'
-                          }`}
-                        >
-                          {downloading === payment.id ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Downloading...
-                            </>
-                          ) : !scriptLoaded ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Loading PDF Tools...
-                            </>
-                          ) : (
-                            <>
-                              <Download className="h-4 w-4 mr-2" />
-                              Download Invoice
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </>
           )}

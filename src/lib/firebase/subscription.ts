@@ -249,10 +249,29 @@ export const getSubscriptionButtonStates = (subscription: SubscriptionData | nul
   return { freeTrialDisabled, simpleDisabled, premiumDisabled };
 };
 
-// Function to store payment history
+// Helper function to generate invoice number
+const generateInvoiceNumber = async (userId: string) => {
+  const date = new Date();
+  const year = date.getFullYear().toString().slice(-2);
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  
+  // Get user's payment count to use as serial number
+  const userPaymentHistoryRef = collection(db, 'users', userId, 'paymentHistory');
+  const q = query(userPaymentHistoryRef);
+  const querySnapshot = await getDocs(q);
+  const serialNumber = (querySnapshot.size + 1).toString().padStart(4, '0');
+  
+  return `INV-${year}${month}${day}-${hours}${minutes}${seconds}-${serialNumber}`;
+};
+
+// Update storePaymentHistory to use async generateInvoiceNumber
 export const storePaymentHistory = async (paymentData: Omit<PaymentHistory, 'id' | 'paymentDate' | 'invoiceNumber'>) => {
   try {
-    const invoiceNumber = generateInvoiceNumber();
+    const invoiceNumber = await generateInvoiceNumber(paymentData.userId);
     const paymentHistory: PaymentHistory = {
       ...paymentData,
       paymentDate: Timestamp.now(),
@@ -345,15 +364,6 @@ export const generateInvoiceData = async (userId: string, paymentId: string): Pr
     console.error('Error generating invoice data:', error);
     throw error;
   }
-};
-
-// Helper function to generate invoice number
-const generateInvoiceNumber = () => {
-  const date = new Date();
-  const year = date.getFullYear().toString().slice(-2);
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `INV-${year}${month}-${random}`;
 };
 
 // Update the existing handleSubscribe function to store payment history

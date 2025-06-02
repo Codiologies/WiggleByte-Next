@@ -23,6 +23,7 @@ const ubuntuMono = Ubuntu_Mono({
 export const metadata: Metadata = {
   title: "WiggleByte",
   description: "Your AI coding companion",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0",
 };
 
 export default function RootLayout({
@@ -31,9 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={ubuntuMono.variable}>
+    <html lang="en" suppressHydrationWarning className={cn(ubuntuMono.variable, "scroll-smooth")}>
       <body className={cn(
-        'min-h-screen bg-background antialiased',
+        'min-h-screen bg-background antialiased overflow-x-hidden',
         inter.className
       )}>
         <LoadingBar />
